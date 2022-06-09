@@ -1,186 +1,112 @@
-[![GitHub Workflow Status (branch)](https://img.shields.io/github/workflow/status/golang-migrate/migrate/CI/master)](https://github.com/golang-migrate/migrate/actions/workflows/ci.yaml?query=branch%3Amaster)
-[![GoDoc](https://pkg.go.dev/badge/github.com/golang-migrate/migrate)](https://pkg.go.dev/github.com/golang-migrate/migrate/v4)
-[![Coverage Status](https://img.shields.io/coveralls/github/golang-migrate/migrate/master.svg)](https://coveralls.io/github/golang-migrate/migrate?branch=master)
-[![packagecloud.io](https://img.shields.io/badge/deb-packagecloud.io-844fec.svg)](https://packagecloud.io/golang-migrate/migrate?filter=debs)
-[![Docker Pulls](https://img.shields.io/docker/pulls/migrate/migrate.svg)](https://hub.docker.com/r/migrate/migrate/)
-![Supported Go Versions](https://img.shields.io/badge/Go-1.16%2C%201.17-lightgrey.svg)
-[![GitHub Release](https://img.shields.io/github/release/golang-migrate/migrate.svg)](https://github.com/golang-migrate/migrate/releases)
-[![Go Report Card](https://goreportcard.com/badge/github.com/golang-migrate/migrate)](https://goreportcard.com/report/github.com/golang-migrate/migrate)
+# 抖音项目
 
-# migrate
+构建环境:`Linux x86_64`
 
-__Database migrations written in Go. Use as [CLI](#cli-usage) or import as [library](#use-in-your-go-project).__
+语言版本:`go version go1.16.14 linux/amd64`
 
-* Migrate reads migrations from [sources](#migration-sources)
-   and applies them in correct order to a [database](#databases).
-* Drivers are "dumb", migrate glues everything together and makes sure the logic is bulletproof.
-   (Keeps the drivers lightweight, too.)
-* Database drivers don't assume things or try to correct user input. When in doubt, fail.
-
-Forked from [mattes/migrate](https://github.com/mattes/migrate)
-
-## Databases
-
-Database drivers run migrations. [Add a new database?](database/driver.go)
-
-* [PostgreSQL](database/postgres)
-* [PGX](database/pgx)
-* [Redshift](database/redshift)
-* [Ql](database/ql)
-* [Cassandra](database/cassandra)
-* [SQLite](database/sqlite)
-* [SQLite3](database/sqlite3) ([todo #165](https://github.com/mattes/migrate/issues/165))
-* [SQLCipher](database/sqlcipher)
-* [MySQL/ MariaDB](database/mysql)
-* [Neo4j](database/neo4j)
-* [MongoDB](database/mongodb)
-* [CrateDB](database/crate) ([todo #170](https://github.com/mattes/migrate/issues/170))
-* [Shell](database/shell) ([todo #171](https://github.com/mattes/migrate/issues/171))
-* [Google Cloud Spanner](database/spanner)
-* [CockroachDB](database/cockroachdb)
-* [ClickHouse](database/clickhouse)
-* [Firebird](database/firebird)
-* [MS SQL Server](database/sqlserver)
-
-### Database URLs
-
-Database connection strings are specified via URLs. The URL format is driver dependent but generally has the form: `dbdriver://username:password@host:port/dbname?param1=true&param2=false`
-
-Any [reserved URL characters](https://en.wikipedia.org/wiki/Percent-encoding#Percent-encoding_reserved_characters) need to be escaped. Note, the `%` character also [needs to be escaped](https://en.wikipedia.org/wiki/Percent-encoding#Percent-encoding_the_percent_character)
-
-Explicitly, the following characters need to be escaped:
-`!`, `#`, `$`, `%`, `&`, `'`, `(`, `)`, `*`, `+`, `,`, `/`, `:`, `;`, `=`, `?`, `@`, `[`, `]`
-
-It's easiest to always run the URL parts of your DB connection URL (e.g. username, password, etc) through an URL encoder. See the example Python snippets below:
+项目结构说明
 
 ```bash
-$ python3 -c 'import urllib.parse; print(urllib.parse.quote(input("String to encode: "), ""))'
-String to encode: FAKEpassword!#$%&'()*+,/:;=?@[]
-FAKEpassword%21%23%24%25%26%27%28%29%2A%2B%2C%2F%3A%3B%3D%3F%40%5B%5D
-$ python2 -c 'import urllib; print urllib.quote(raw_input("String to encode: "), "")'
-String to encode: FAKEpassword!#$%&'()*+,/:;=?@[]
-FAKEpassword%21%23%24%25%26%27%28%29%2A%2B%2C%2F%3A%3B%3D%3F%40%5B%5D
-$
+
+   .
+├── bin # 二进制可执行文件目录
+│   ├── main # 主程序可执行文件
+│   └── migrate # 数据库迁移的可执行文件
+├── cmd # 入口函数所在目录
+│   ├── main # 主程序
+│   │   └── main.go
+│   └── migrate # 数据库迁移程序
+│       └── migrate.go
+├── config # 配置文件
+│   ├── app # 本地配置文件(默认)
+│   ├── app_docker # docker配置文件(以docker-compose运行默认此配置)
+│   └── redis # redis配置文件
+├── docker-compose.yml
+├── Dockerfile
+├── go.mod
+├── go.sum
+├── internal # 主代码目录
+│   ├── api # 接口处理路径
+│   │   └── v1 # v1 版本接口目录
+│   │       ├── enter.go # api 入口点
+│   │       └── user.go # user的api
+│   ├── dao # 持久化层
+│   │   ├── enter.go # dao入口点
+│   │   ├── mysql
+│   │   │   ├── migration # 表结构，用于数据库迁移
+│   │   │   │   ├── 000001_init_schema.down.sql # 删除结构
+│   │   │   │   └── 000001_init_schema.up.sql # 创建数据库结构
+│   │   │   ├── mysql.go
+│   │   │   ├── query # 查询语句，使用sqlc生成go代码
+│   │   │   │   ├── user_followers.sql # user_followers 相关操作
+│   │   │   │   └── user.sql # user 相关操作
+│   │   │   └── sqlc # sqlc生成的代码目录 每个操作需要详细的单元测试
+│   │   └── redis
+│   │       └── redis.go
+│   ├── global # 全局变量
+│   │   ├── global.go # 全局
+│   │   ├── infer.go # 推断root
+│   │   └── infer_test.go
+│   ├── logic # 逻辑处理层
+│   │   ├── enter.go # logic 入口点
+│   │   └── user.go # user logic
+│   ├── middleware # 中间件
+│   │   ├── auth.go # 鉴权
+│   │   ├── cores.go # 跨域
+│   │   ├── limiter.go # 限流
+│   │   ├── logger.go # 日志
+│   │   └── recovery.go # 恢复
+│   ├── model # 模型目录
+│   │   ├── common # 通用模型
+│   │   │   └── common.go
+│   │   ├── config # 配置文件模型，用户绑定配置文件
+│   │   │   └── config.go
+│   │   ├── reply # 回复模型
+│   │   │   ├── common.go
+│   │   │   └── user.go
+│   │   └── request # 请求模型
+│   │       └── user.go
+│   ├── pkg # 相关组件
+│   │   ├── app # 用于格式的规范
+│   │   │   ├── errcode
+│   │   │   │   ├── codes.go # 所有错误码放这里
+│   │   │   │   └── err.go
+│   │   │   └── reply.go # 回复
+│   │   ├── email # 邮箱
+│   │   ├── limiter # 限流
+│   │   ├── logger # 日志
+│   │   ├── password # 密码加密
+│   │   ├── setting # 配置文件读取
+│   │   ├── snowflake # 生成ID
+│   │   ├── times # 时间包
+│   │   ├── token # 生成token
+│   │   ├── upload # oss
+│   │   └── utils # 工具包
+│   ├── routing
+│   │   ├── enter.go # 路由层入口
+│   │   ├── router
+│   │   │   └── router.go # 新建路由
+│   │   └── user.go
+│   └── setting # 初始化相关流程
+└── storage # 相关数据持久化
+    └── Applogs # 产生的日志
+├── Makefile # 便捷操作
+├── README.md
+├── sqlc.yaml # sqlc配置文件
+├── start.sh # 用于构建时初始化数据库
+├── storage
+│   └── Applogs
+│       ├── error.log # 错误日志
+│       └── info.log # 常规日志
+└── wait-for.sh # 用于构建时服务间同步
 ```
-
-## Migration Sources
-
-Source drivers read migrations from local or remote sources. [Add a new source?](source/driver.go)
-
-* [Filesystem](source/file) - read from filesystem
-* [Go-Bindata](source/go_bindata) - read from embedded binary data ([jteeuwen/go-bindata](https://github.com/jteeuwen/go-bindata))
-* [GitHub](source/github) - read from remote GitHub repositories
-* [GitHub Enterprise](source/github_ee) - read from remote GitHub Enterprise repositories
-* [Bitbucket](source/bitbucket) - read from remote Bitbucket repositories
-* [Gitlab](source/gitlab) - read from remote Gitlab repositories
-* [AWS S3](source/aws_s3) - read from Amazon Web Services S3
-* [Google Cloud Storage](source/google_cloud_storage) - read from Google Cloud Platform Storage
-
-## CLI usage
-
-* Simple wrapper around this library.
-* Handles ctrl+c (SIGINT) gracefully.
-* No config search paths, no config files, no magic ENV var injections.
-
-__[CLI Documentation](cmd/migrate)__
-
-### Basic usage
-
-```bash
-$ migrate -source file://path/to/migrations -database postgres://localhost:5432/database up 2
+# 项目docker运行
+`docker-compose up`
+# 项目本机测试
 ```
-
-### Docker usage
-
-```bash
-$ docker run -v {{ migration dir }}:/migrations --network host migrate/migrate
-    -path=/migrations/ -database postgres://localhost:5432/database up 2
+# 初始化 mysql 本机端口3366
+make mysql_init
+# 初始化 redis 运行不了就把对应makefile执行语句复制到终端执行
+make redis_init 本机端口7963
+然后启动本地项目就行
 ```
-
-## Use in your Go project
-
-* API is stable and frozen for this release (v3 & v4).
-* Uses [Go modules](https://golang.org/cmd/go/#hdr-Modules__module_versions__and_more) to manage dependencies.
-* To help prevent database corruptions, it supports graceful stops via `GracefulStop chan bool`.
-* Bring your own logger.
-* Uses `io.Reader` streams internally for low memory overhead.
-* Thread-safe and no goroutine leaks.
-
-__[Go Documentation](https://godoc.org/github.com/golang-migrate/migrate)__
-
-```go
-import (
-    "github.com/golang-migrate/migrate/v4"
-    _ "github.com/golang-migrate/migrate/v4/database/postgres"
-    _ "github.com/golang-migrate/migrate/v4/source/github"
-)
-
-func main() {
-    m, err := migrate.New(
-        "github://mattes:personal-access-token@mattes/migrate_test",
-        "postgres://localhost:5432/database?sslmode=enable")
-    m.Steps(2)
-}
-```
-
-Want to use an existing database client?
-
-```go
-import (
-    "database/sql"
-    _ "github.com/lib/pq"
-    "github.com/golang-migrate/migrate/v4"
-    "github.com/golang-migrate/migrate/v4/database/postgres"
-    _ "github.com/golang-migrate/migrate/v4/source/file"
-)
-
-func main() {
-    db, err := sql.Open("postgres", "postgres://localhost:5432/database?sslmode=enable")
-    driver, err := postgres.WithInstance(db, &postgres.Config{})
-    m, err := migrate.NewWithDatabaseInstance(
-        "file:///migrations",
-        "postgres", driver)
-    m.Steps(2)
-}
-```
-
-## Getting started
-
-Go to [getting started](GETTING_STARTED.md)
-
-## Tutorials
-
-* [CockroachDB](database/cockroachdb/TUTORIAL.md)
-* [PostgreSQL](database/postgres/TUTORIAL.md)
-
-(more tutorials to come)
-
-## Migration files
-
-Each migration has an up and down migration. [Why?](FAQ.md#why-two-separate-files-up-and-down-for-a-migration)
-
-```bash
-1481574547_create_users_table.up.sql
-1481574547_create_users_table.down.sql
-```
-
-[Best practices: How to write migrations.](MIGRATIONS.md)
-
-## Versions
-
-Version | Supported? | Import | Notes
---------|------------|--------|------
-**master** | :white_check_mark: | `import "github.com/golang-migrate/migrate/v4"` | New features and bug fixes arrive here first |
-**v4** | :white_check_mark: | `import "github.com/golang-migrate/migrate/v4"` | Used for stable releases |
-**v3** | :x: | `import "github.com/golang-migrate/migrate"` (with package manager) or `import "gopkg.in/golang-migrate/migrate.v3"` (not recommended) | **DO NOT USE** - No longer supported |
-
-## Development and Contributing
-
-Yes, please! [`Makefile`](Makefile) is your friend,
-read the [development guide](CONTRIBUTING.md).
-
-Also have a look at the [FAQ](FAQ.md).
-
----
-
-Looking for alternatives? [https://awesome-go.com/#database](https://awesome-go.com/#database).
