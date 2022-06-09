@@ -1,0 +1,53 @@
+# 本机测试文件
+Server: # 服务配置
+  RunMode: debug # release 为生产模式
+  Address: :8080 # 监听端口
+  ReadTimeout: 5s
+  WriteTimeout: 5s
+  DefaultContextTimeout: 30s #默认超时时间
+App: # App配置文件
+  Name: douyin
+  Version: 1.0.0
+  StartTime: 2022-05-21
+  Format: 2006-01-02
+Log: # 日志配置文件
+  Level: release
+  LogSavePath: "storage/Applogs/" # 日志保存路径
+  HighLevelFile: error          # 高级别日志文件名
+  LowLevelFile: info          # 低级别文件名
+  LogFileExt: .log          # 日志文件后缀
+  MaxSize: 200 # 日志文件最大大小
+  MaxAge: 30 # 日志文件最大保存天数
+  MaxBackups: 7 # 最大备份数
+  Compress: false # 是否压缩
+Mysql:
+  DriverName: mysql # 驱动名
+  SourceName: "root:123456@tcp(localhost:3366)/douyin?parseTime=true&charset=utf8"
+Redis:
+  Address: "localhost:7963"
+  DB: 0
+  Password:
+  PoolSize: 100 #连接池
+  PostInfoTimeout: 1h
+Email:
+  Host: smtp.qq.com
+  Port: 465
+  UserName: "xxx@qq.com" # 发送邮箱
+  Password: "xxx" # 发送邮箱密钥
+  IsSSL: true
+  From: "xxx@qq.com" # 发送邮箱
+  To: # 接收邮箱
+    - "xxx@qq.com"
+Token: # Token配置
+  Key: "12345678123456781234567812345678" # Token秘钥
+  AssessTokenDuration: 24h # Token有效期
+Rule: # 规则配置
+  UsernameLenMax: 32 # 用户名最大长度
+  UsernameLenMin: 3 # 用户名最小长度
+  PasswordLenMax: 32 # 密码最大长度
+  PasswordLenMin: 6 # 密码最小长度
+  CommentLenMax: 100 # 评论最大长度
+  CommentLenMin: 1 # 评论最小长度
+  TitlesLenMax: 20 # 标题最大长度
+  TitlesLenMin: 1 # 标题最小长度
+  DefaultCoverURL: "https://avatars.githubusercontent.com/u/76676061?v=4" # 默认封面

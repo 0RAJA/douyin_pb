@@ -1,0 +1,47 @@
+version: "3.8"
+volumes:
+  mysql_80_data:
+  mysql_80_conf:
+  redis_62:
+  douyin:
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: mysql_80
+    privileged: true
+    ports:
+      - "3366:3306"
+    environment:
+      MYSQL_DATABASE: douyin
+      MYSQL_ROOT_PASSWORD: 123456
+      LANG: C.UTF-8
+      character_set_database: utf8
+    volumes:
+      - mysql_80_data:/var/lib/mysql # 数据库
+      - mysql_80_conf:/etc/mysql # 配置文件
+  redis:
+    image: redis:6.2
+    container_name: redis_62
+    privileged: true # 权限
+    ports:
+      - "7963:7963"
+    volumes:
+      - ./config/redis:/redis #配置文件
+      - redis_62:/redis/data #数据库
+    entrypoint: [ "redis-server","/redis/redis.conf" ]
+  douyin:
+    build:
+      context: .  # context 选项可以是 Dockerfile 的文件路径，也可以是到链接到 git 仓库的 url。
+      dockerfile: Dockerfile
+    container_name: douyin
+    ports:
+      - "8080:8080"
+    depends_on:
+      - mysql
+      - redis
+    volumes:
+      - douyin:/app
+    entrypoint: [ "/app/wait-for.sh","redis_62:7963","mysql_80:3306","--","/app/start.sh" ] #等待数据库加载完成，并且初始化数据库表
+    command: [ "/app/main","-path=/app/config/app_docker" ]
+
+

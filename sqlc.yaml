@@ -1,0 +1,11 @@
+# sqlc配置文件
+version: 1
+packages:
+  - name: "db" # package name
+    path: "internal/dao/mysql/sqlc" # 生成代码路径
+    engine: "mysql" # 引擎
+    schema: "internal/dao/mysql/migration" # 表结构
+    queries: "internal/dao/mysql/query/" # 查询语句
+    emit_json_tags: true # 将json放到标签
+    emit_empty_slices: true # 查不到值返回空切片
+    emit_interface: true # 生成包含查询结构所有功能的接口
